@@ -17,29 +17,35 @@ import com.viafoura.R;
 public class WebViewExample extends Activity {
 
 
-    private static final String TEST_SITE = "http://gusmelo.com/envs/envs.html";
+    private static final String TEST_SITE = "http://192.168.120.131:8000";
+    //private static final String TEST_SITE = "http://test.vf-staging.com/sloppy-homeless-guy-recipes.html";
+    //private static final String TEST_SITE = "http://gusmelo.com/envs/envs.html";
 
     private android.webkit.WebView mWebView;
+    
+    private boolean flag = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_web_view);
-
+        WebView.setWebContentsDebuggingEnabled(true);
         mWebView = (WebView) findViewById(R.id.activity_web_view);
 
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-
+        mWebView.setWebChromeClient(new android.webkit.WebChromeClient());
         mWebView.setWebViewClient(new WebViewClient() {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
-
+                
                 if (url.contains(com.viafoura.SocialLoginController.VIAFOURA_SOCIAL_LOGIN_URL)) {
+
+
 
                     Log.i("shouldOverrideUrlLoading", "Caught social login request.  Instantiating Social Login Controller with URL: " + url);
 
@@ -60,6 +66,7 @@ public class WebViewExample extends Activity {
         });
 
         mWebView.loadUrl(TEST_SITE);
+    	mWebView.loadUrl("javascript:window.addEventListener('message', function(e) {alert(e.origin+':'+location.origin+':'+navigator.userAgent+':'+/CriOS\\//.test(navigator.userAgent));});");
     }
 
     // Listen for results.
@@ -78,8 +85,12 @@ public class WebViewExample extends Activity {
 
                         Log.i("onActivityResult", "Caught successful Social Login" + postCommand);
 
-                        mWebView.loadUrl("javascript:" + postCommand, null);
+                        
+                        //postMessageCommand = "window.postMessage('" + query_pairs.get("token") + "', '*')";
 
+                        mWebView.loadUrl("javascript:window.postMessage('" + postCommand+"','*');");
+                        mWebView.loadUrl("javascript:window.opener.postMessage('" + postCommand+"','*');");
+                        //mWebView.loadUrl("javascript:alert('abc');");
                         break;
 
                     default:

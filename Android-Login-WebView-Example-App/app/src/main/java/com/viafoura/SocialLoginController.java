@@ -115,18 +115,32 @@ public class SocialLoginController extends Activity {
                     try {
 
                         URL url = new URL(urlString);
-
+                         
                         Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-                        String query = url.getQuery();
-                        String[] pairs = query.split("&");
-                        for (String pair : pairs) {
+                        //String query = url.getQuery();
+                        int queryStart = URLDecoder.decode(urlString).indexOf("?") + 1;
+                        String query = urlString.substring(queryStart);
+                        Log.i("SocialLoginController.shouldOverrideUrlLoading", " base query is: " + query);
+                        String[] pairs = query.split("\\x26");
+                        Log.i("SocialLoginController.shouldOverrideUrlLoading", " first pair raw is: " + pairs.length);
+                        Log.i("SocialLoginController.shouldOverrideUrlLoading", " second pair raw is: " + pairs[1]);
+                        for (int i = 0 ; i < pairs.length; i++) {
+                            String pair = pairs[i];
+                            Log.i("SocialLoginController.shouldOverrideUrlLoading", " parameter raw is: " + pair + ":" + i);
                             int idx = pair.indexOf("=");
+                            if (idx < 0) {
+                                continue;
+                            }
+                            Log.i("SocialLoginController.shouldOverrideUrlLoading", " parameter is: " + URLDecoder.decode(pair.substring(0, idx), "UTF-8") +" = " + URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
                             query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
                         }
 
                         // build the JavaScript post message containing the token.
-                        postMessageCommand = "window.postMessage('" + query_pairs.get("token") + "', '*')";
-
+                        //postMessageCommand = "window.postMessage('" + query_pairs.get("token") + "', '*')";
+                        postMessageCommand = "window.postMessage('02c061d2-c293-47dc-b363-a39b8ce967c1', '*')";
+                        //postMessageCommand = "window.opener.postMessage('" + query_pairs.get("token") + "')";
+                        //postMessageCommand = "alert(\"abc\");";
+                        //postMessageCommand = query_pairs.get("token");
                         Log.i("SocialLoginController.shouldOverrideUrlLoading", "postMessageCommand is: " + postMessageCommand);
 
                     } catch (Exception ex) {
@@ -165,7 +179,7 @@ public class SocialLoginController extends Activity {
                     query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
                 }
 
-                callbackURL = query_pairs.get("callback");
+                callbackURL = URLDecoder.decode(query_pairs.get("callback"));
 
                 Log.i("SocialLoginController.shouldOverrideUrlLoading", "Callback URL is: " + callbackURL);
             } catch (Exception ex) {
